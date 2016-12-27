@@ -3,6 +3,9 @@
 #include <opencv2/opencv.hpp>
 
 #include <circle_rectangulation.h>
+#include <simple_transformation.h>
+#include <simple_interpolator.h>
+#include <ahe_transformation.h>
 
 int main(int argc, char* argv[]){
 
@@ -20,6 +23,14 @@ int main(int argc, char* argv[]){
   
   cv::imshow("Original Image", original_image);
   cv::imshow("Split Matrix", visualizable);
+
+  //SimpleTransformation transformation;
+  AHETransformation transformation(original_image, split_matrix);
+  SimpleInterpolator interpolator;
+
+  cv::Mat interpolated_image = interpolator.interpolate(original_image, split_matrix, transformation);
+
+  cv::imshow("Interpolated Image", interpolated_image);
   cv::waitKey();
 
   return 0;
