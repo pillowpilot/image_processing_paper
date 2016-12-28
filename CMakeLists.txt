@@ -28,6 +28,9 @@ target_link_libraries(SimpleTransformation ${OpenCV_LIBS} Transformation)
 add_library(AHETransformation SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/ahe_transformation)
 target_link_libraries(AHETransformation ${OpenCV_LIBS} Transformation)
 
+add_library(CLAHETransformation SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/clahe_transformation)
+target_link_libraries(CLAHETransformation ${OpenCV_LIBS} AHETransformation)
+
 add_library(InterpolationScheme SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/interpolation_scheme)
 
 add_library(SimpleInterpolator SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/simple_interpolator)
@@ -37,4 +40,10 @@ add_executable(Main ${CMAKE_CURRENT_SOURCE_DIR}/src/main)
 set_property(TARGET Main PROPERTY CXX_STANDARD 11)
 set_property(TARGET Main PROPERTY CXX_STANDARD_REQUIRED ON)
 
-target_link_libraries(Main ${OpenCV_LIBS} CircleRectangulation SimpleTransformation AHETransformation SimpleInterpolator)
+target_link_libraries(Main
+				${OpenCV_LIBS}
+				CircleRectangulation
+				SimpleTransformation
+				AHETransformation
+				CLAHETransformation
+				SimpleInterpolator)
