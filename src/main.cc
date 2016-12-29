@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
   AHETransformation transformation(original_image, split_matrix);
   //CLAHETransformation transformation(original_image, split_matrix, 0.3);
   //SimpleInterpolator interpolator;
-  CircleInterpolation interpolator(25);
+  CircleInterpolation interpolator(5);
 
   cv::Mat interpolated_image = interpolator.interpolate(original_image, split_matrix, transformation);
 

@@ -10,12 +10,15 @@ cv::Mat CircleInterpolation::doInterpolation(const cv::Mat original_image, const
 {
   const int rows = original_image.rows;
   const int columns = original_image.cols;
-  
+
+  std::unordered_map<int, int> saved_mapping;
   cv::Mat interpolated_image(rows, columns, CV_8U);
 
+  calculateAreas(split_matrix, -1, 0);
   for(int row = 0; row < rows; row++)
     {
-      calculateAreas(split_matrix, row, 0);
+      updateAreasGoDown(split_matrix, row-1, 0);
+      saved_mapping = region_area_mapping_;
       // TODO Fast access
       int intensity = original_image.at<uchar>(row, 0);
       int interpolated_intensity = calculateInterpolation(intensity, transformation);
@@ -30,6 +33,7 @@ cv::Mat CircleInterpolation::doInterpolation(const cv::Mat original_image, const
 	  // TODO Fast access
 	  interpolated_image.at<uchar>(row, column) = interpolated_intensity;
 	}
+      region_area_mapping_ = saved_mapping;
     }
 
   return interpolated_image;
