@@ -36,6 +36,9 @@ add_library(InterpolationScheme SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/interpola
 add_library(SimpleInterpolator SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/simple_interpolator)
 target_link_libraries(SimpleInterpolator ${OpenCV_LIBS} InterpolationScheme)
 
+add_library(CircleInterpolation SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/circle_interpolation)
+target_link_libraries(CircleInterpolation ${OpenCV_LIBS} InterpolationScheme Transformation)
+
 add_executable(Main ${CMAKE_CURRENT_SOURCE_DIR}/src/main)
 set_property(TARGET Main PROPERTY CXX_STANDARD 11)
 set_property(TARGET Main PROPERTY CXX_STANDARD_REQUIRED ON)
@@ -46,4 +49,6 @@ target_link_libraries(Main
 				SimpleTransformation
 				AHETransformation
 				CLAHETransformation
-				SimpleInterpolator)
+				SimpleInterpolator
+				CircleInterpolation
+				)

@@ -5,6 +5,7 @@
 #include <circle_rectangulation.h>
 #include <simple_transformation.h>
 #include <simple_interpolator.h>
+#include <circle_interpolation.h>
 #include <ahe_transformation.h>
 #include <clahe_transformation.h>
 
@@ -28,7 +29,8 @@ int main(int argc, char* argv[]){
   //SimpleTransformation transformation;
   AHETransformation transformation(original_image, split_matrix);
   //CLAHETransformation transformation(original_image, split_matrix, 0.3);
-  SimpleInterpolator interpolator;
+  //SimpleInterpolator interpolator;
+  CircleInterpolation interpolator(25);
 
   cv::Mat interpolated_image = interpolator.interpolate(original_image, split_matrix, transformation);
 
