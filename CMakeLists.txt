@@ -1,14 +1,21 @@
 cmake_minimum_required(VERSION 2.8)
 project(code_paper)
 
+set(CMAKE_BUILD_TYPE relwithdebinfo)
+
 set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_CXX_FLAGS_DEBUG  "-g")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
+
+# Including BOOST
+find_package(Boost COMPONENTS filesystem system REQUIRED)
+IF(Boost_FOUND)
+	include_directories(${Boost_INCLUDE_DIR})
+endif()
 
 add_library(RNG SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/random_number_generator)
 
@@ -39,16 +46,47 @@ target_link_libraries(SimpleInterpolator ${OpenCV_LIBS} InterpolationScheme)
 add_library(CircleInterpolation SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/circle_interpolation)
 target_link_libraries(CircleInterpolation ${OpenCV_LIBS} InterpolationScheme Transformation)
 
+add_library(Metric SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/metric)
+
+add_library(MeanSquaredError SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/mean_squared_error)
+target_link_libraries(MeanSquaredError ${OpenCV_LIBS} Metric)
+
+add_library(NormalizedMeanSquaredError SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/normalized_mean_squared_error)
+target_link_libraries(NormalizedMeanSquaredError ${OpenCV_LIBS} MeanSquaredError)
+
+add_library(HistogramSpread SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/histogram_spread)
+target_link_libraries(HistogramSpread ${OpenCV_LIBS} Metric)
+
+add_library(ImageStreamer SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/image_streamer)
+target_link_libraries(ImageStreamer ${Boost_LIBRARIES})
+
 add_executable(Main ${CMAKE_CURRENT_SOURCE_DIR}/src/main)
+set_property(TARGET Main PROPERTY CXX_STANDARD 11)
+set_property(TARGET Main PROPERTY CXX_STANDARD_REQUIRED ON)
+
+add_executable(RadioExperiment ${CMAKE_CURRENT_SOURCE_DIR}/src/radio_experiment)
 set_property(TARGET Main PROPERTY CXX_STANDARD 11)
 set_property(TARGET Main PROPERTY CXX_STANDARD_REQUIRED ON)
 
 target_link_libraries(Main
 				${OpenCV_LIBS}
+				${Boost_LIBRARIES}
 				CircleRectangulation
 				SimpleTransformation
 				AHETransformation
 				CLAHETransformation
 				SimpleInterpolator
 				CircleInterpolation
+				MeanSquaredError
 				)
+
+target_link_libraries(RadioExperiment
+					${OpenCV_LIBS}
+					${Boost_LIBRARIES}
+					ImageStreamer
+					CircleRectangulation
+					CLAHETransformation
+					AHETransformation
+					CircleInterpolation
+					NormalizedMeanSquaredError
+					)
