@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(code_paper)
 
-set(CMAKE_BUILD_TYPE relwithdebinfo)
+#set(CMAKE_BUILD_TYPE relwithdebinfo)
+set(CMAKE_BUILD_TYPE debug)
 
 set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
@@ -26,6 +27,9 @@ target_link_libraries(Rectangulation Optimizable)
 
 add_library(CircleRectangulation SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/circle_rectangulation)
 target_link_libraries(CircleRectangulation ${OpenCV_LIBS} Rectangulation RNG)
+
+add_library(TreeRectangulation SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/tree_rectangulation)
+target_link_libraries(TreeRectangulation ${OpenCV_LIBS} Rectangulation RNG)
 
 add_library(Transformation SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/transformation)
 
@@ -72,6 +76,7 @@ target_link_libraries(Main
 				${OpenCV_LIBS}
 				${Boost_LIBRARIES}
 				CircleRectangulation
+				TreeRectangulation
 				SimpleTransformation
 				AHETransformation
 				CLAHETransformation
