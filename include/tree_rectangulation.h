@@ -1,13 +1,17 @@
 #ifndef TREE_RECTANGULATION_H
 #define TREE_RECTANGULATION_H
 
+#include <queue>
+#include <vector>
+#include <cassert>
+#include <string> // TODO Remove
+#include <sstream> // TODO Remove
+#include <iostream> // TODO Remove
+#include <cmath>
+#include <opencv2/opencv.hpp>
 #include <rectangulation.h>
 #include <optimizable.h>
 #include <random_number_generator.h>
-
-#include <queue>
-#include <cassert>
-#include <cmath>
 
 class Node: public Optimizable
 {
@@ -26,8 +30,17 @@ class Node: public Optimizable
 
  public:
  Node():
-  left_child_(nullptr), right_child_(nullptr), parent_(nullptr)//, orientation_(Orientation::Horizontal)
-    { }
+  left_child_(nullptr), right_child_(nullptr), parent_(nullptr)
+    {
+    }
+  
+ Node(const Node& other):
+  left_child_(other.left_child_), right_child_(other.right_child_),
+    pivot_row_(other.pivot_row_), pivot_column_(other.pivot_column_),
+    region_width_(other.region_width_), region_height_(other.region_height_),
+    split_line_(other.split_line_), height_(other.height_), orientation_(other.orientation_)
+    {
+    }
 
   ~Node()
     {
@@ -53,9 +66,9 @@ class Node: public Optimizable
   inline int getSplitLineMaximumValue() const
   {
     if( orientation_ == Orientation::Horizontal )
-      return region_height_ + 1;
+      return region_height_;
     else
-      return region_width_ + 1;
+      return region_width_;
   }
 
   inline int doGetNumberOfParameters() const override
@@ -66,38 +79,74 @@ class Node: public Optimizable
 
   inline double doGetParameter(int index) const override
   {
-    return split_line_;
+    if( orientation_ == Orientation::Horizontal )
+      return split_line_ / region_height_;
+    else
+      return split_line_ / region_width_;
   }
 
-  inline void doSetParameter(int index, double value) override
-  {
-    split_line_ = std::round(value);      
-  }
+  void doSetParameter(int index, double value) override;
+  void fixInvariants();
+
+  void printToCout() const;
 };
 
 class TreeRectangulation: public Rectangulation
 {
  protected:
+  std::vector<Node*> parameter_node_mapping_;
   Node* root_;
   int split_matrix_rows_, split_matrix_columns_;
   int minimum_area_;
   
  public:
   TreeRectangulation(const cv::Mat original_image, double alpha=0.1);
+  TreeRectangulation(const TreeRectangulation& other);
   ~TreeRectangulation()
     {
       delete root_;
     }
+
+  void checkTreeInvariants() const;
   
  private:
-  void buildRandomTree();
+  Node* buildRandomTree(const cv::Mat original_image, const double alpha) const;  
+  std::vector<Node*> buildParameterToNodeMapping(Node* root) const;
   cv::Mat doRandomSplitMatrix(const cv::Mat original_image) const override;
   cv::Mat doSplitMatrix() const override;
   int doGetNumberOfParameters() const override;
-  
-  // TODO Implement!
-  double doGetParameter(int index) const override {}
-  void doSetParameter(int index, double value) override {}
+  double doGetParameter(int index) const override;
+  void doSetParameter(int index, double value) override;
 };
+
+void printTree(std::ostringstream& oss, const Node* n, std::string prefix="", bool isTail=true)
+{
+  using namespace std;
+  
+  oss << prefix;
+  if( isTail ) oss << "└── ";
+  else oss << "├── ";
+
+  oss << "(" << n->pivot_row_ << ", " << n->pivot_column_ << ")  ";
+  oss << "[" << n->region_width_ << ", " << n->region_height_ << "]  ";
+  oss << n->split_line_;
+  
+  oss << std::endl;
+  
+  if( !n->isLeaf() )
+    {
+      printTree(oss, n->left_child_, prefix + (isTail ? "    " : "│   "), false);
+      printTree(oss, n->right_child_, prefix + (isTail ? "    " : "│   "), true);      
+    }
+}
+
+
+std::ostream& operator<<(std::ostream& os, const Node* n)
+{
+  std::ostringstream oss;
+  printTree(oss, n);
+  os << oss.str();
+  return os;
+}
 
 #endif

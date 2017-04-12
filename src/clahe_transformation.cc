@@ -1,5 +1,17 @@
 #include <clahe_transformation.h>
 
+CLAHETransformation::CLAHETransformation(const cv::Mat original_image, const Rectangulation& rectangulation, double clip_limit)
+{
+  // TODO Exception for original_image and split_matrix are valid
+  // TODO Exception for split_matrix is valid for original_image
+
+  const cv::Mat split_matrix = rectangulation.getSplitMatrix();
+  buildHistograms(original_image, split_matrix);
+  applyClipLimit(clip_limit);
+  makeHistogramsCumulative();
+  normalizeCumulativeHistograms();
+}
+
 CLAHETransformation::CLAHETransformation(const cv::Mat original_image, const cv::Mat split_matrix, double clip_limit)
 {
   // TODO Exception for original_image and split_matrix are valid

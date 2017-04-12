@@ -1,15 +1,104 @@
 #include <tree_rectangulation.h>
-#include <iostream>
+
+#include <iostream> //TODO Delete this imports
+#include <queue>
+#include <cassert>
+
+void Node::fixInvariants(){
+  const Node* parent = parent_;
+
+  double proportion;
+  if( orientation_ == Orientation::Horizontal )
+    proportion = (double)split_line_/region_height_;
+  else
+    proportion = (double)split_line_/region_width_;
+
+  if( !isLeaf() ) assert(0 <= proportion && proportion <= 1);
+  const bool is_left_child = parent->left_child_ == this;
+  if( is_left_child ){    
+    // Fix pivot point
+    pivot_row_ = parent->pivot_row_;
+    pivot_column_ = parent->pivot_column_;
+
+    // Fix region dim
+    if( parent->orientation_ == Orientation::Horizontal )
+      {
+	region_width_ = parent->region_width_;
+	region_height_ = parent->region_height_ + parent->split_line_;
+      }
+    else
+      {
+	region_width_ = parent->region_width_ + parent->split_line_;
+	region_height_ = parent->region_height_;
+      }
+  }else{
+    // Pivot point
+    if( parent->orientation_ == Orientation::Horizontal )
+      {
+	pivot_row_ = parent->pivot_row_ + parent->split_line_;
+	pivot_column_ = parent->pivot_column_;
+      }
+    else
+      {
+	pivot_row_ = parent->pivot_row_;
+	pivot_column_ = parent->pivot_column_ + parent->split_line_;
+      }
+    
+    // Region Dims
+    if( parent->orientation_ == Orientation::Horizontal )
+      {
+	region_width_ = parent->region_width_;
+	region_height_ = parent->region_height_-parent->split_line_;
+      }
+    else
+      {
+	region_width_ = parent->region_width_-parent->split_line_;
+	region_height_ = parent->region_height_;
+      }
+  }
+
+  if( orientation_ == Orientation::Horizontal )
+    split_line_ = (int)(proportion*region_height_);
+  else
+    split_line_ = (int)(proportion*region_width_);
+
+  if( !isLeaf() ) assert(0 <= split_line_ && split_line_ <= getSplitLineMaximumValue());
+  if( !isLeaf() ){
+    left_child_->fixInvariants();
+    right_child_->fixInvariants();
+  }
+}
+
+void Node::doSetParameter(int index, double value)
+{
+  assert(0 <= value && value <= 1);
+  const int new_split_line = (int)std::round(value*getSplitLineMaximumValue());
+  assert(0 <= new_split_line && new_split_line <= getSplitLineMaximumValue());
+  split_line_ = new_split_line;
+  left_child_->fixInvariants();
+  right_child_->fixInvariants();
+}
 
 TreeRectangulation::TreeRectangulation(const cv::Mat original_image, double alpha):
   split_matrix_rows_(original_image.rows), split_matrix_columns_(original_image.cols), minimum_area_(alpha*original_image.rows*original_image.cols), root_(nullptr)
 {
-  
+  root_ = buildRandomTree(original_image, alpha);
+  parameter_node_mapping_ = buildParameterToNodeMapping(root_);
+  std::cout << root_ << std::endl;
+  checkTreeInvariants();
+}
+
+TreeRectangulation::TreeRectangulation(const TreeRectangulation& other):
+  root_(other.root_), split_matrix_rows_(other.split_matrix_rows_),
+  split_matrix_columns_(other.split_matrix_columns_), minimum_area_(other.minimum_area_),
+  parameter_node_mapping_(buildParameterToNodeMapping(root_))
+{
 }
 
 cv::Mat TreeRectangulation::doSplitMatrix() const
 {
   cv::Mat split_matrix(split_matrix_rows_, split_matrix_columns_, CV_32S);
+  split_matrix = cv::Mat::zeros(split_matrix_rows_, split_matrix_columns_, CV_32S);
   std::queue<Node*> nodes;
   nodes.push(root_);
 
@@ -25,6 +114,7 @@ cv::Mat TreeRectangulation::doSplitMatrix() const
 	    {
 	      const int row = node->pivot_row_+row_offset;
 	      const int column = node->pivot_column_+column_offset;
+	      assert(split_matrix.at<int>(row, column) == 0);
 	      split_matrix.at<int>(row, column) = region_id;
 	    }
 	region_id++;
@@ -36,12 +126,17 @@ cv::Mat TreeRectangulation::doSplitMatrix() const
       }
   }
 
+  for(int row = 0; row < split_matrix_rows_; row++)
+    for(int column = 0; column < split_matrix_columns_; column++)
+      assert(split_matrix.at<int>(row, column) != 0);
+
+  root_->printToCout();
+      
   return split_matrix;
 }
 
-cv::Mat TreeRectangulation::doRandomSplitMatrix(const cv::Mat original_image) const
+Node* TreeRectangulation::buildRandomTree(const cv::Mat original_image, const double alpha) const
 {
-  const double alpha = 0.1; // TODO Magic number
   const int minimum_area = alpha*original_image.rows*original_image.cols;
   
   Random& random = Random::getInstance();
@@ -53,12 +148,8 @@ cv::Mat TreeRectangulation::doRandomSplitMatrix(const cv::Mat original_image) co
   root->region_width_ = original_image.cols;
   root->height_ = 0;
 
-  TreeRectangulation tree_rectangulation(original_image, alpha);
-  tree_rectangulation.root_ = root;
-
   tasks.push(root);
 
-  int region_id = 0;
   while( !tasks.empty() ){
     Node* node = tasks.front();
     tasks.pop();
@@ -70,8 +161,9 @@ cv::Mat TreeRectangulation::doRandomSplitMatrix(const cv::Mat original_image) co
 	else
 	  node->orientation_ = Node::Orientation::Vertical;
 	  
-	const int split_line = random.nextInt(1, node->getSplitLineMaximumValue()-1);
+	const int split_line = random.nextInt(0, node->getSplitLineMaximumValue());
 	node->split_line_ = split_line;
+	assert(0 <= split_line && split_line <= node->getSplitLineMaximumValue());
 
 	Node* left_child = new Node;
 	Node* right_child = new Node;
@@ -110,27 +202,95 @@ cv::Mat TreeRectangulation::doRandomSplitMatrix(const cv::Mat original_image) co
       }
   }
 
-  return tree_rectangulation.getSplitMatrix();
+  return root;
 }
 
-int TreeRectangulation::doGetNumberOfParameters() const
+std::vector<Node*> TreeRectangulation::buildParameterToNodeMapping(Node* root) const
 {
-  int number_of_parameters = 0;
+  std::vector<Node*> parameter_node_mapping;
   
   std::queue<Node*> nodes;
-  nodes.push(root_);
+  nodes.push(root);
   while( !nodes.empty() )
     {
       Node* node = nodes.front();
       nodes.pop();
 
-      number_of_parameters+= node->getNumberOfParameters();
+      if( node->getNumberOfParameters() == 1 )
+	parameter_node_mapping.push_back(node);
 
       if( node->left_child_ != nullptr ) nodes.push(node->left_child_);
       if( node->right_child_ != nullptr ) nodes.push(node->right_child_);
     }
 
-  return number_of_parameters;
+  return parameter_node_mapping;
 }
 
+cv::Mat TreeRectangulation::doRandomSplitMatrix(const cv::Mat original_image) const
+{
+  Random& random = Random::getInstance();
+  const double alpha = random.nextDouble();
+  TreeRectangulation rectangulation(original_image, alpha);
+  
+  return rectangulation.getSplitMatrix();
+}
 
+int TreeRectangulation::doGetNumberOfParameters() const
+{
+  return parameter_node_mapping_.size();
+}
+
+double TreeRectangulation::doGetParameter(int index) const
+{
+  assert(0 <= index);
+  assert(index < parameter_node_mapping_.size());
+  
+  Node* node = parameter_node_mapping_[index];
+  return node->getParameter(0);
+}
+
+void TreeRectangulation::doSetParameter(int index, double value)
+{
+  assert(0 <= index);
+  assert(index < parameter_node_mapping_.size());
+  
+  assert( 0 <= value );
+  assert( value <= 1 );
+
+  Node* node = parameter_node_mapping_[index];
+  node->setParameter(0, value);
+}
+
+void TreeRectangulation::checkTreeInvariants() const
+{
+  using namespace std;
+
+  const int rows = split_matrix_rows_;
+  const int cols = split_matrix_columns_;
+  
+  queue<Node*> q;
+  q.push(root_);
+  while( !q.empty() ){
+    Node* n = q.front(); q.pop();
+
+    assert( 0 <= n->pivot_row_ && n->pivot_row_ < rows );
+    assert( 0 <= n->pivot_column_ && n->pivot_column_ < cols );
+    
+    assert( 0 <= n->pivot_row_ + n->region_height_ && n->pivot_row_ + n->region_height_ <= rows );
+    assert( 0 <= n->pivot_column_ + n->region_width_ && n->pivot_column_ + n->region_width_ <= cols );
+
+    if( !n->isLeaf() ){
+      assert( 0 <= n->split_line_ && n->split_line_ <= n->getSplitLineMaximumValue() );
+    }
+
+    if( !n->isLeaf() ){
+      q.push(n->left_child_);
+      q.push(n->right_child_);
+    }
+  }
+}
+
+void Node::printToCout() const
+{
+  std::cout << this << std::endl;
+}

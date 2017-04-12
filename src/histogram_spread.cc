@@ -1,23 +1,30 @@
 #include <histogram_spread.h>
+#include <iostream> // TODO Debug
 
-HistogramSpread::HistogramSpread(const cv::Mat image):
-histogram_(256) // TODO Magic number
+HistogramSpread::HistogramSpread(): histogram_(256) // TODO Magic number
+{
+}
+
+double HistogramSpread::calculateMetric(const cv::Mat image)
 {
   buildHistogram(image);
   makeHistogramCumulative();
   normalizeCumulativeHistogram();
-}
-
-double HistogramSpread::calculateMetric()
-{
+  
   const int first_quartile = getFirstQuartile();
   const int third_quartile = getThirdQuartile();
-  const int possible_range = 255 - 0;
+  const int possible_range = 255 - 0; // TODO Magic number
 
   double histogram_spread = (double)(third_quartile - first_quartile)/possible_range;
   if(histogram_spread < 0)
     histogram_spread = 0;
 
+  {
+    using namespace std;
+    cout << "First Quartile: " << first_quartile << endl;
+    cout << "Third Quartile: " << third_quartile << endl;
+  }
+  
   return histogram_spread;
 }
 
@@ -64,7 +71,7 @@ int HistogramSpread::getFirstQuartile() const
 
 int HistogramSpread::getThirdQuartile() const
 {
-  int intensity = histogram_.size();
+  int intensity = histogram_.size()-1;
   while(0 <= intensity && histogram_[intensity] > 0.75)
     intensity--;
 

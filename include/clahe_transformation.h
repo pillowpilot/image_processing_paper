@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <opencv2/opencv.hpp>
 #include <transformation.h>
+#include <rectangulation.h>
 
 class CLAHETransformation: public Transformation
 {
@@ -13,6 +14,7 @@ class CLAHETransformation: public Transformation
   std::vector< std::vector<int> > transformations_;
   
  public:
+  CLAHETransformation(const cv::Mat original_image, const Rectangulation& rectangulation, double clip_limit=0.75);
   CLAHETransformation(const cv::Mat original_image, const cv::Mat split_matrix, double clip_limit=0.75);
 
  private:

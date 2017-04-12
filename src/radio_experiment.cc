@@ -101,6 +101,7 @@ int main(int argc, char** argv)
       std::vector<high_resolution_clock::time_point> time_points;
       time_points.push_back(high_resolution_clock::now());
 
+      MeanSquaredError mse(interpolated_reference);
       for(double percentage: percentages)
 	{
 	  percentage /= 100;
@@ -108,8 +109,7 @@ int main(int argc, char** argv)
 	  CircleInterpolation interpolator(radius);
 	  cv::Mat interpolated = interpolator.interpolate(image, split_matrix, transformation);
 
-	  MeanSquaredError mse(interpolated_reference, interpolated);
-	  double error = mse.getMetric();
+	  double error = mse.getMetric(interpolated);
 	  
 	  errors.push_back(error);
 	  time_points.push_back(high_resolution_clock::now());

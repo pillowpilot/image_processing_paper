@@ -1,0 +1,35 @@
+INSTALL MINGW AND CMAKE
+
+1. Install MinGW into $MinGW
+   1.1 Install mingw32-base and mingw32-gcc-g++.
+   1.2 Append $MinGW/bin to $Path.
+2. Install CMake.
+
+INSTALL OPENCV
+
+1. Download and extract OpenCV into $OpenCV.
+2. Run CMake with:
+   Source dir: $OpenCV/source
+   Build dir : $OpenCV/build/x86/mingw
+
+   Configure and generate.
+3. Run mingw32-make in $OpenCV/build/x86/mingw.
+
+If OpenCV is 2.4, then the following error should appear
+   BTNS_AUTOSIZE is not defined
+To solve this, modify $MinGW/include/commctrl.h by searching the line /* define _WIN32_IE if you really want to */
+and modify the underneath text so it ends been like this:
+#if 1
+#define _WIN32_IE   0x0500
+#endif
+
+INSTALL BOOST
+
+1. Download and extract Boost into $Boost.
+2. Run "bootstrap.bat gcc" and "b2 toolset=gcc" to build Boost.
+3. Append $Boost to $Path.
+
+TO COMPILE PROYECTS
+
+1. Set OpenCV_DIR as $OpenCV.
+2. Set Boost_INCLUDE_DIR as $Boost.

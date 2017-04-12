@@ -18,5 +18,5 @@ void Optimizable::setParameter(int index, double value)
 {
   assert(0 <= index);
   assert(index < getNumberOfParameters());
-  return doSetParameter(index, value);
+  doSetParameter(index, value);
 }

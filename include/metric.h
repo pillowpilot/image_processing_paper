@@ -5,10 +5,10 @@
 
 class Metric{
  private:
-  virtual double calculateMetric() = 0;
+  virtual double calculateMetric(const cv::Mat image) = 0;
 
  public:
-  double getMetric();
+  double getMetric(const cv::Mat image);
   
 };
 

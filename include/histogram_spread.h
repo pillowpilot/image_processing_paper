@@ -10,10 +10,10 @@ class HistogramSpread: public Metric{
   std::vector<double> histogram_;
   
  public:
-  HistogramSpread(const cv::Mat image);
+  HistogramSpread();
   
  protected:
-  double calculateMetric();
+  double calculateMetric(const cv::Mat image);
   void buildHistogram(const cv::Mat image);
   void makeHistogramCumulative();
   void normalizeCumulativeHistogram();

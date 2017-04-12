@@ -8,13 +8,13 @@
 class MeanSquaredError: public Metric
 {
  protected:
-  const cv::Mat image_a, image_b;
+  const cv::Mat reference_image_;
   
  public:
-  MeanSquaredError(const cv::Mat image_a, const cv::Mat image_b);
+  MeanSquaredError(const cv::Mat reference_image);
 
  protected:
-  double calculateMetric();
+  double calculateMetric(const cv::Mat image);
   
 };
 

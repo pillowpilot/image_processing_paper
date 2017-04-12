@@ -1,19 +1,14 @@
 #include <mean_squared_error.h>
 
-MeanSquaredError::MeanSquaredError(const cv::Mat image_a, const cv::Mat image_b)
-  :image_a(image_a), image_b(image_b)
+MeanSquaredError::MeanSquaredError(const cv::Mat reference_image)
+  :reference_image_(reference_image)
 {
-  // TODO If image_a and image_b are incompatible, exception.
-  assert(!image_a.empty());
-  assert(!image_b.empty());
-  assert(image_a.rows == image_b.rows);
-  assert(image_a.cols == image_b.cols);
 }
 
-double MeanSquaredError::calculateMetric()
+double MeanSquaredError::calculateMetric(const cv::Mat image)
 {
-  const int rows = image_a.rows;
-  const int columns = image_a.cols;
+  const int rows = reference_image_.rows;
+  const int columns = reference_image_.cols;
 
   double mean_squared_error = 0;
   for(int row = 0; row < rows; row++)
@@ -21,8 +16,8 @@ double MeanSquaredError::calculateMetric()
       for(int column = 0; column < columns; column++)
 	{
 	  // TODO Fast access
-	  const int intensity_a = image_a.at<uchar>(row, column);
-	  const int intensity_b = image_b.at<uchar>(row, column);
+	  const int intensity_a = reference_image_.at<uchar>(row, column);
+	  const int intensity_b = image.at<uchar>(row, column);
 	  
 	  double diference_squared = std::pow(intensity_a - intensity_b, 2);
 
