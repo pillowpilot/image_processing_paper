@@ -24,12 +24,10 @@ int main(int argc, char* argv[]){
   
   const std::string image_filename("../resources/lake.tif");
   cv::Mat original_image = cv::imread(image_filename, CV_LOAD_IMAGE_GRAYSCALE);
-  const int number_of_circles = 40;
 
   Random& random = Random::getInstance();
   random.setSeed(seed);
   
-  //CircleRectangulation rectangulation(original_image, number_of_circles);
   TreeRectangulation rectangulation(original_image, 0.1);
 
   cv::Mat splitMatrix = rectangulation.getSplitMatrix();

@@ -19,6 +19,9 @@ void Random::setSeed(long new_seed)
   rng_ = new cv::RNG(new_seed);
 }
 
+/*
+  Returns a random integer uniformly distributed from [lower_bound, upper_bound)
+ */
 int Random::nextInt(int lower_bound, int upper_bound)
 {
   return rng_->uniform(lower_bound, upper_bound);

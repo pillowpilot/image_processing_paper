@@ -66,9 +66,9 @@ class Node: public Optimizable
   inline int getSplitLineMaximumValue() const
   {
     if( orientation_ == Orientation::Horizontal )
-      return region_height_;
+      return region_height_-1;
     else
-      return region_width_;
+      return region_width_-1;
   }
 
   inline int doGetNumberOfParameters() const override
@@ -88,6 +88,7 @@ class Node: public Optimizable
   void doSetParameter(int index, double value) override;
   void fixInvariants();
 
+  friend void printTree(std::ostringstream& oss, const Node* n, std::string prefix="", bool isTail=true);
   void printToCout() const;
 };
 
@@ -116,10 +117,12 @@ class TreeRectangulation: public Rectangulation
   cv::Mat doSplitMatrix() const override;
   int doGetNumberOfParameters() const override;
   double doGetParameter(int index) const override;
+  std::pair<int, int> getBounds(int index) const; // TODO Add to upper classes
   void doSetParameter(int index, double value) override;
 };
 
-void printTree(std::ostringstream& oss, const Node* n, std::string prefix="", bool isTail=true)
+/*
+void printTree(std::ostringstream& oss, const Node* n, std::string prefix, bool isTail)
 {
   using namespace std;
   
@@ -139,8 +142,8 @@ void printTree(std::ostringstream& oss, const Node* n, std::string prefix="", bo
       printTree(oss, n->right_child_, prefix + (isTail ? "    " : "│   "), true);      
     }
 }
-
-
+*/
+/*
 std::ostream& operator<<(std::ostream& os, const Node* n)
 {
   std::ostringstream oss;
@@ -148,5 +151,6 @@ std::ostream& operator<<(std::ostream& os, const Node* n)
   os << oss.str();
   return os;
 }
+*/
 
 #endif

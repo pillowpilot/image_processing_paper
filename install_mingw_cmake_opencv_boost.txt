@@ -7,13 +7,18 @@ INSTALL MINGW AND CMAKE
 
 INSTALL OPENCV
 
-1. Download and extract OpenCV into $OpenCV.
+1. Download and extract OpenCV into $OpenCV_DOWNLOAD.
 2. Run CMake with:
-   Source dir: $OpenCV/source
-   Build dir : $OpenCV/build/x86/mingw
+   Source dir: $OpenCV_DOWNLOAD/source
+   Build dir : $OpenCV_BUILD (e.g. $OpenCV_DOWNLOAD/build/x86/mingw)
 
-   Configure and generate.
-3. Run mingw32-make in $OpenCV/build/x86/mingw.
+   Configure, with CMAKE_BUILD_TYPE=RelWithDebugInfo, and generate.
+3. Run "mingw32-make" and "ming32-make install" in $OpenCV_BUILD.
+4. Move $OpenCV_BUILD to your final directory $OpenCV (e.g. C:\opencv24)
+5. Add $OpenCV to its own Enviroment Variable %OPENCV_DIR% and add %OPENCV_DIR%\bin to %PATH%.
+
+NOTE:
+For every project, add the entry "OpenCV_DIR" as %OPENCV_DIR%.
 
 If OpenCV is 2.4, then the following error should appear
    BTNS_AUTOSIZE is not defined
@@ -29,7 +34,5 @@ INSTALL BOOST
 2. Run "bootstrap.bat gcc" and "b2 toolset=gcc" to build Boost.
 3. Append $Boost to $Path.
 
-TO COMPILE PROYECTS
-
-1. Set OpenCV_DIR as $OpenCV.
-2. Set Boost_INCLUDE_DIR as $Boost.
+NOTE:
+For every project, add the entry "BOOST_ROOT" as $Boost.

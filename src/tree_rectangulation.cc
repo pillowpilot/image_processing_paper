@@ -83,6 +83,11 @@ TreeRectangulation::TreeRectangulation(const cv::Mat original_image, double alph
   split_matrix_rows_(original_image.rows), split_matrix_columns_(original_image.cols), minimum_area_(alpha*original_image.rows*original_image.cols), root_(nullptr)
 {
   root_ = buildRandomTree(original_image, alpha);
+
+  std::ostringstream oss;
+  printTree(oss, root_);
+  std::cout << oss.str() << std::endl;
+  
   parameter_node_mapping_ = buildParameterToNodeMapping(root_);
   std::cout << root_ << std::endl;
   checkTreeInvariants();
@@ -138,6 +143,7 @@ cv::Mat TreeRectangulation::doSplitMatrix() const
 Node* TreeRectangulation::buildRandomTree(const cv::Mat original_image, const double alpha) const
 {
   const int minimum_area = alpha*original_image.rows*original_image.cols;
+  std::cout << minimum_area << std::endl;
   
   Random& random = Random::getInstance();
   std::queue<Node*> tasks;
@@ -154,16 +160,22 @@ Node* TreeRectangulation::buildRandomTree(const cv::Mat original_image, const do
     Node* node = tasks.front();
     tasks.pop();
 
-    if( minimum_area < node->getRegionArea() )
+    if( minimum_area <= node->getRegionArea() && 1 < node->getRegionArea() )
       {
-	if( random.nextInt(0, 2) == 0 )
+	if( node->region_width_ == 1 )
 	  node->orientation_ = Node::Orientation::Horizontal;
-	else
+	else if( node->region_height_ == 1 )
 	  node->orientation_ = Node::Orientation::Vertical;
+	else
+	  {
+	    if( random.nextInt(0, 2) == 0 )
+	      node->orientation_ = Node::Orientation::Horizontal;
+	    else
+	      node->orientation_ = Node::Orientation::Vertical;
+	  }
 	  
-	const int split_line = random.nextInt(0, node->getSplitLineMaximumValue());
+	const int split_line = random.nextInt(1, node->getSplitLineMaximumValue()+1); // From [1, maxV]
 	node->split_line_ = split_line;
-	assert(0 <= split_line && split_line <= node->getSplitLineMaximumValue());
 
 	Node* left_child = new Node;
 	Node* right_child = new Node;
@@ -196,9 +208,10 @@ Node* TreeRectangulation::buildRandomTree(const cv::Mat original_image, const do
 	    right_child->region_width_ = node->region_width_-node->split_line_;
 	    right_child->region_height_ = node->region_height_;
 	  }
-	
+
 	tasks.push(left_child);
-	tasks.push(right_child);	
+	tasks.push(right_child);
+      
       }
   }
 
@@ -288,6 +301,38 @@ void TreeRectangulation::checkTreeInvariants() const
       q.push(n->right_child_);
     }
   }
+}
+
+void printTree(std::ostringstream& oss, const Node* n, std::string prefix, bool isTail)
+{
+  using namespace std;
+  
+  oss << prefix;
+  if( isTail ) oss << "└── ";
+  else oss << "├── ";
+
+  oss << "[" << n << "]  ";
+  oss << "pivot=" << "(" << n->pivot_row_ << ", " << n->pivot_column_ << ")  ";
+  oss << "(width, height)=" << "(" << n->region_width_ << ", " << n->region_height_ << ")  ";
+
+  if( !n->isLeaf() )
+    {
+      oss << "split line=" << n->split_line_ << " in [0, " << n->getSplitLineMaximumValue() <<"]  ";
+      oss << "orientation=";
+      if( n->orientation_ == Node::Orientation::Horizontal )
+	oss << "Horizontal";
+      else
+	oss << "Vertical";
+  
+      oss << std::endl;
+
+      printTree(oss, n->left_child_, prefix + (isTail ? "    " : "│   "), false);
+      printTree(oss, n->right_child_, prefix + (isTail ? "    " : "│   "), true);      
+    }
+  else
+    {
+      oss << std::endl;
+    }
 }
 
 void Node::printToCout() const
