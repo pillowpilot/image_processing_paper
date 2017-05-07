@@ -161,5 +161,11 @@ target_link_libraries(TRTest
 				)
 
 target_link_libraries(TRZTest
+				${Boost_LIBRARIES}
+				${OpenCV_LIBS}
 				TreeRectangulationZero
+				CLAHETransformation
+				CircleInterpolation
+				ContrastImprovementRatio
+				ImageStreamer
 				)

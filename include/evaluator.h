@@ -48,8 +48,23 @@ class Evaluator
 
     const double evaluation = metric_.getMetric(interpolated_image);
     
-    return evaluation;
+    return -evaluation;
   }
+
+  cv::Mat getOptimizedImage(const dlib::matrix<double, 0, 1>& args) const
+    {
+      for(int index = 0; index < args.nc(); index++)
+	{
+	  const double parameter = args(index);
+	  rectangulation_.setParameter(index, parameter);
+	}
+    
+      const cv::Mat split_matrix = rectangulation_.getSplitMatrix();
+    
+      const cv::Mat interpolated_image = interpolation_scheme_.interpolate(original_image_, split_matrix, transformation_);
+
+      return interpolated_image;
+    }
 };
 
 #endif

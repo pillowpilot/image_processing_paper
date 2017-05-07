@@ -11,9 +11,10 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <rectangulation.h>
 #include <random_number_generator.h>
 
-class TreeRectangulationZero
+class TreeRectangulationZero: public Rectangulation
 {
  protected:
   class Node
@@ -50,20 +51,33 @@ class TreeRectangulationZero
   }; // End of Node class
 
  protected:
+  int rows_, columns_;
   Node* root_;
+  std::vector<Node*> node_to_parameter_mapping_;
   
  public:
-  TreeRectangulationZero(int maximum_height=4);
+  TreeRectangulationZero(const cv::Mat original_image, int maximum_height=4);
   // TODO Add TreeRectangulationZero( const TreeRectangulationZero& other);
-  cv::Mat getSplitMatrix(int rows, int columns) const;
   friend std::ostream& operator<<(std::ostream& os, const TreeRectangulationZero::Node& n);
   friend std::ostream& operator<<(std::ostream& os, const TreeRectangulationZero& t);
 
  protected:
   Node* buildRandomTree(int maximum_height) const;
-  void getSplitMatrixHelper(cv::Mat split_matrix, const Node* node, std::pair<int, int> pivot, std::pair<int, int> dimentions, int* region_id) const;
+  void getSplitMatrixHelper(cv::Mat split_matrix, const Node* node, std::pair<int, int> pivot,
+			    std::pair<int, int> dimentions, int* region_id) const;
+  std::vector<Node*> getNodesToParametersMapping() const;
+  
   // TODO make static
   void dump(std::ostringstream& oss, const Node* n, std::string prefix="", bool isTail=true) const;
+
+  // Optimizable methods
+  int doGetNumberOfParameters() const override;
+  double doGetParameter(int index) const override;
+  void doSetParameter(int index, double value) override;
+
+  // Rectangulation methods
+  cv::Mat doRandomSplitMatrix(const cv::Mat original_image) const override;
+  cv::Mat doSplitMatrix() const override;
 
 };
 #endif

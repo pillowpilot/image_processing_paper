@@ -1,4 +1,7 @@
 #include <contrast_improvement_ratio.h>
+#include <iostream>
+
+#define debug(x) std::cout << (#x) << " = " << (x) << std::endl;
 
 ContrastImprovementRatio::ContrastImprovementRatio(const cv::Mat reference_image):
   reference_image_(reference_image)
@@ -15,8 +18,8 @@ double ContrastImprovementRatio::calculateMetric(const cv::Mat image)
   const int columns = image.cols;
 
   // TODO Expand to all pixels!
-  long long sum_of_differences = 0;
-  long long sum_of_squares = 0;
+  double sum_of_differences = 0;
+  double sum_of_squares = 0;
   for(int row = 1; row < rows-1; row++)
     {
       for(int column = 1; column < columns-1; column++)
@@ -26,11 +29,11 @@ double ContrastImprovementRatio::calculateMetric(const cv::Mat image)
 
 	  sum_of_differences += std::pow(image_lc - reference_image_lc, 2);
 	  sum_of_squares += std::pow(image_lc, 2);
+
 	}
     }
 
-  const double cir = (double)sum_of_differences / sum_of_squares;
-
+  const double cir = sum_of_differences / sum_of_squares;
   return cir;
 }
 
@@ -53,9 +56,14 @@ double ContrastImprovementRatio::calculateLocalContrast(const cv::Mat image, int
   const double surrounding_region_average = (double)surrounding_region_sum / number_of_neighbors;
   const double center_region_average = (double)image.at<uchar>(row, column);
 
-  double local_contrast = center_region_average - surrounding_region_average;
-  local_contrast /= center_region_average + surrounding_region_average;
+  double local_contrast = std::abs(center_region_average - surrounding_region_average);
 
+  if( std::abs(center_region_average + surrounding_region_average) != 0.0 )
+    local_contrast /= std::abs(center_region_average + surrounding_region_average);
+  else
+    local_contrast = 0.0;
+
+  assert(0.0 <= local_contrast && local_contrast <= 1.0);
   return local_contrast;
 }
 

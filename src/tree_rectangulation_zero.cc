@@ -1,8 +1,10 @@
 #include <tree_rectangulation_zero.h>
 
-TreeRectangulationZero::TreeRectangulationZero(int maximum_height)
+TreeRectangulationZero::TreeRectangulationZero(const cv::Mat original_image, int maximum_height):
+  rows_(original_image.rows), columns_(original_image.cols)
 {
   root_ = buildRandomTree(maximum_height);
+  node_to_parameter_mapping_ = getNodesToParametersMapping();
 }
 
 TreeRectangulationZero::Node* TreeRectangulationZero::buildRandomTree(int maximum_height) const
@@ -79,8 +81,8 @@ void TreeRectangulationZero::getSplitMatrixHelper(cv::Mat split_matrix, const No
   else if( node->isLeaf() && region_area != 0 )
     {
 
-      std::cerr << "[" << node << "] (" << pivot.first << ", " << pivot.second << ") " << "[" << dimentions.first << ", " << dimentions.second << "]"
-		<< " Area: " << dimentions.first*dimentions.second << std::endl;
+      //std::cerr << "[" << node << "] (" << pivot.first << ", " << pivot.second << ") " << "[" << dimentions.first << ", " << dimentions.second << "]"
+      //<< " Area: " << dimentions.first*dimentions.second << std::endl;
       
       for(int row_offset = 0; row_offset < dimentions.first; row_offset++)
 	{
@@ -99,19 +101,71 @@ void TreeRectangulationZero::getSplitMatrixHelper(cv::Mat split_matrix, const No
     }
 }
 
-cv::Mat TreeRectangulationZero::getSplitMatrix(int rows, int columns) const
-{  
-  cv::Mat split_matrix = cv::Mat::zeros(rows, columns, CV_32S);
+std::vector<TreeRectangulationZero::Node*> TreeRectangulationZero::getNodesToParametersMapping() const
+{
+  std::vector<Node*> mapping;
+  
+  std::queue<Node*> tasks;
+  tasks.push(root_);
+
+  while( !tasks.empty() )
+    {
+      Node* node = tasks.front();
+      tasks.pop();
+
+      if( !node->isLeaf() )
+	{
+	  mapping.push_back(node);
+	  tasks.push(node->left_child_);
+	  tasks.push(node->right_child_);
+	}
+    }
+
+  return mapping;
+}
+
+int TreeRectangulationZero::doGetNumberOfParameters() const
+{
+  return node_to_parameter_mapping_.size();
+}
+
+double TreeRectangulationZero::doGetParameter(int index) const
+{
+  const Node* node = node_to_parameter_mapping_[index];
+  return node->split_line_;
+}
+
+void TreeRectangulationZero::doSetParameter(int index, double value)
+{
+  assert(0.0 <= value && value <= 1.0);
+  Node* node = node_to_parameter_mapping_[index];
+  node->split_line_ = value;
+}
+
+cv::Mat TreeRectangulationZero::doRandomSplitMatrix(const cv::Mat original_image) const
+{
+  Random& random = Random::getInstance();
+  
+  const int tree_height = random.nextInt(1, 8); // TODO Magic numbers
+  TreeRectangulationZero rectangulation(tree_height);
+
+  cv::Mat split_matrix = rectangulation.getSplitMatrix();
+  return split_matrix;
+}
+
+cv::Mat TreeRectangulationZero::doSplitMatrix() const
+{
+  cv::Mat split_matrix = cv::Mat::zeros(rows_, columns_, CV_32S);
   int region_id = 1;
   
-  getSplitMatrixHelper(split_matrix, root_, {0, 0}, {rows, columns}, &region_id);
+  getSplitMatrixHelper(split_matrix, root_, {0, 0}, {rows_, columns_}, &region_id);
 
   // TODO Remove invariants check
-  for(int row = 0; row < rows; row++)
-    for(int column = 0; column < columns; column++)
+  for(int row = 0; row < rows_; row++)
+    for(int column = 0; column < columns_; column++)
       assert( split_matrix.at<int>(row, column) != 0 );
 
-  return split_matrix;
+  return split_matrix; 
 }
 
 void TreeRectangulationZero::dump(std::ostringstream& oss, const Node* n, std::string prefix, bool isTail) const
