@@ -88,8 +88,8 @@ int main(int argc, char** argv)
       const int image_area = image.cols*image.rows;
       assert(!image.empty());
 
-      CircleRectangulation rectangulation(image, number_of_circles);
-      const cv::Mat split_matrix = rectangulation.getRandomSplitMatrix(image);
+      CircleRectangulation rectangulation(image.rows, image.cols, number_of_circles);
+      const cv::Mat split_matrix = rectangulation.getRandomSplitMatrix(image.rows, image.cols);
       AHETransformation transformation(image, split_matrix);
 
       const double reference_percentage = percentages[percentages.size()-1] / 100;

@@ -37,8 +37,7 @@ int main(int argc, char* argv[]){
   Random& random = Random::getInstance();
   random.setSeed(seed);
 
-  
-  TreeRectangulation rectangulation(original_image, 0.1);
+  TreeRectangulation rectangulation(original_image.rows, original_image.cols, 0.1);
 
   cv::Mat splitMatrix = rectangulation.getSplitMatrix();
   cv::Mat visualizable = rectangulation.prepareForVisualization(splitMatrix);

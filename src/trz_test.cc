@@ -20,7 +20,7 @@ std::pair<double, cv::Mat> optimize(const cv::Mat original_image){
     return std::make_pair(0.0, cv::Mat::zeros(1, 1, CV_64F));
   }
   
-  TreeRectangulationZero r(original_image, 2);
+  TreeRectangulationZero r(original_image.rows, original_image.cols, 2);
   cv::Mat split_matrix = r.getSplitMatrix();
 
   /*{

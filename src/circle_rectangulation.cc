@@ -1,20 +1,17 @@
 #include <circle_rectangulation.h>
-#include <iostream>
 
-CircleRectangulation::CircleRectangulation(cv::Mat original_image, int number_of_circles):
-  split_matrix_rows_(original_image.rows), split_matrix_columns_(original_image.cols), circles_(number_of_circles)
+CircleRectangulation::CircleRectangulation(int rows, int columns, int number_of_circles):
+  split_matrix_rows_(rows), split_matrix_columns_(columns), circles_(number_of_circles)
 {
 }
 
-cv::Mat CircleRectangulation::doRandomSplitMatrix(const cv::Mat original_image) const
+cv::Mat CircleRectangulation::doRandomSplitMatrix(int rows, int columns) const
 {
   Random& random = Random::getInstance();
-  const int rows = original_image.rows;
-  const int columns = original_image.cols;
   const int max_radius = 100; // TODO Magic number
   const int number_of_circles = random.nextInt(1, 100); // TODO Magic Numbers
 
-  CircleRectangulation rectangulation(original_image, number_of_circles);
+  CircleRectangulation rectangulation(rows, columns, number_of_circles);
 
   const int number_of_parameters = rectangulation.getNumberOfParameters();
   for(int index = 0; index < number_of_parameters; index++)

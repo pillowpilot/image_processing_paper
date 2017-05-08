@@ -54,14 +54,14 @@ class CircleRectangulation: public Rectangulation
   std::vector<Circle> circles_;
   
  public:
-  CircleRectangulation(const cv::Mat original_image, int number_of_circles);
+  CircleRectangulation(int rows, int columns, int number_of_circles);
   ~CircleRectangulation() { }
   
  private:
   int doGetNumberOfParameters() const override;
   double doGetParameter(int index) const override;
   void doSetParameter(int index, double value) override;
-  cv::Mat doRandomSplitMatrix(const cv::Mat original_image) const override;
+  cv::Mat doRandomSplitMatrix(int rows, int columns) const override;
   cv::Mat doSplitMatrix() const override;
   
 };

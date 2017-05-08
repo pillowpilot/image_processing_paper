@@ -56,16 +56,16 @@ class TreeRectangulationZero: public Rectangulation
   std::vector<Node*> node_to_parameter_mapping_;
   
  public:
-  TreeRectangulationZero(const cv::Mat original_image, int maximum_height=4);
+  TreeRectangulationZero(int rows, int columns, int maximum_height=4);
   // TODO Add TreeRectangulationZero( const TreeRectangulationZero& other);
   friend std::ostream& operator<<(std::ostream& os, const TreeRectangulationZero::Node& n);
   friend std::ostream& operator<<(std::ostream& os, const TreeRectangulationZero& t);
 
  protected:
   Node* buildRandomTree(int maximum_height) const;
+  std::vector<Node*> getNodesToParametersMapping() const;
   void getSplitMatrixHelper(cv::Mat split_matrix, const Node* node, std::pair<int, int> pivot,
 			    std::pair<int, int> dimentions, int* region_id) const;
-  std::vector<Node*> getNodesToParametersMapping() const;
   
   // TODO make static
   void dump(std::ostringstream& oss, const Node* n, std::string prefix="", bool isTail=true) const;
@@ -76,7 +76,7 @@ class TreeRectangulationZero: public Rectangulation
   void doSetParameter(int index, double value) override;
 
   // Rectangulation methods
-  cv::Mat doRandomSplitMatrix(const cv::Mat original_image) const override;
+  cv::Mat doRandomSplitMatrix(int rows, int columns) const override;
   cv::Mat doSplitMatrix() const override;
 
 };

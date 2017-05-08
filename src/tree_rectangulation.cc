@@ -1,9 +1,5 @@
 #include <tree_rectangulation.h>
 
-#include <iostream> //TODO Delete this imports
-#include <queue>
-#include <cassert>
-
 void Node::fixInvariants(){
   const Node* parent = parent_;
 
@@ -79,15 +75,15 @@ void Node::doSetParameter(int index, double value)
   right_child_->fixInvariants();
 }
 
-TreeRectangulation::TreeRectangulation(const cv::Mat original_image, double alpha):
-  split_matrix_rows_(original_image.rows), split_matrix_columns_(original_image.cols), minimum_area_(alpha*original_image.rows*original_image.cols), root_(nullptr)
+TreeRectangulation::TreeRectangulation(int rows, int columns, double alpha):
+  split_matrix_rows_(rows), split_matrix_columns_(columns), minimum_area_(alpha*rows*columns), root_(nullptr)
 {
-  root_ = buildRandomTree(original_image, alpha);
+  root_ = buildRandomTree(rows, columns, alpha);
 
   std::ostringstream oss;
   printTree(oss, root_);
   std::cout << oss.str() << std::endl;
-  
+
   parameter_node_mapping_ = buildParameterToNodeMapping(root_);
   std::cout << root_ << std::endl;
   checkTreeInvariants();
@@ -140,9 +136,9 @@ cv::Mat TreeRectangulation::doSplitMatrix() const
   return split_matrix;
 }
 
-Node* TreeRectangulation::buildRandomTree(const cv::Mat original_image, const double alpha) const
+Node* TreeRectangulation::buildRandomTree(int rows, int columns, double alpha) const
 {
-  const int minimum_area = alpha*original_image.rows*original_image.cols;
+  const int minimum_area = alpha*rows*columns;
   std::cout << minimum_area << std::endl;
   
   Random& random = Random::getInstance();
@@ -150,8 +146,8 @@ Node* TreeRectangulation::buildRandomTree(const cv::Mat original_image, const do
 
   Node* root = new Node;
   root->pivot_row_ = root->pivot_column_ = 0;
-  root->region_height_ = original_image.rows;
-  root->region_width_ = original_image.cols;
+  root->region_height_ = rows;
+  root->region_width_ = columns;
   root->height_ = 0;
 
   tasks.push(root);
@@ -239,12 +235,12 @@ std::vector<Node*> TreeRectangulation::buildParameterToNodeMapping(Node* root) c
   return parameter_node_mapping;
 }
 
-cv::Mat TreeRectangulation::doRandomSplitMatrix(const cv::Mat original_image) const
+cv::Mat TreeRectangulation::doRandomSplitMatrix(int rows, int columns) const
 {
   Random& random = Random::getInstance();
   const double alpha = random.nextDouble();
-  TreeRectangulation rectangulation(original_image, alpha);
-  
+  TreeRectangulation rectangulation(rows, columns, alpha);
+
   return rectangulation.getSplitMatrix();
 }
 

@@ -1,11 +1,8 @@
 #include <rectangulation.h>
 
-#include <iostream>
-
-cv::Mat Rectangulation::getRandomSplitMatrix(const cv::Mat original_image) const
+cv::Mat Rectangulation::getRandomSplitMatrix(int rows, int columns) const
 {
-  assert(!original_image.empty());
-  return doRandomSplitMatrix(original_image);
+  return doRandomSplitMatrix(rows, columns);
 }
 
 cv::Mat Rectangulation::getSplitMatrix() const

@@ -8,12 +8,12 @@
 class Rectangulation: public Optimizable
 {
  public:
-  cv::Mat getRandomSplitMatrix(const cv::Mat original_image) const;
+  cv::Mat getRandomSplitMatrix(int rows, int column) const;
   cv::Mat getSplitMatrix() const;
   cv::Mat prepareForVisualization(const cv::Mat split_matrix) const;
   
  private:
-  virtual cv::Mat doRandomSplitMatrix(const cv::Mat original_image) const = 0;
+  virtual cv::Mat doRandomSplitMatrix(int rows, int columns) const = 0;
   virtual cv::Mat doSplitMatrix() const = 0;
   
 };

@@ -101,7 +101,7 @@ class TreeRectangulation: public Rectangulation
   int minimum_area_;
   
  public:
-  TreeRectangulation(const cv::Mat original_image, double alpha=0.1);
+  TreeRectangulation(int rows, int columns, double alpha=0.1);
   TreeRectangulation(const TreeRectangulation& other);
   ~TreeRectangulation()
     {
@@ -111,9 +111,9 @@ class TreeRectangulation: public Rectangulation
   void checkTreeInvariants() const;
   
  private:
-  Node* buildRandomTree(const cv::Mat original_image, const double alpha) const;  
+  Node* buildRandomTree(int rows, int columns, double alpha) const;
   std::vector<Node*> buildParameterToNodeMapping(Node* root) const;
-  cv::Mat doRandomSplitMatrix(const cv::Mat original_image) const override;
+  cv::Mat doRandomSplitMatrix(int rows, int columns) const override;
   cv::Mat doSplitMatrix() const override;
   int doGetNumberOfParameters() const override;
   double doGetParameter(int index) const override;

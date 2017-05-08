@@ -1,7 +1,7 @@
 #include <tree_rectangulation_zero.h>
 
-TreeRectangulationZero::TreeRectangulationZero(const cv::Mat original_image, int maximum_height):
-  rows_(original_image.rows), columns_(original_image.cols)
+TreeRectangulationZero::TreeRectangulationZero(int rows, int columns, int maximum_height):
+  rows_(rows), columns_(columns)
 {
   root_ = buildRandomTree(maximum_height);
   node_to_parameter_mapping_ = getNodesToParametersMapping();
@@ -142,12 +142,12 @@ void TreeRectangulationZero::doSetParameter(int index, double value)
   node->split_line_ = value;
 }
 
-cv::Mat TreeRectangulationZero::doRandomSplitMatrix(const cv::Mat original_image) const
+cv::Mat TreeRectangulationZero::doRandomSplitMatrix(int rows, int columns) const
 {
   Random& random = Random::getInstance();
-  
-  const int tree_height = random.nextInt(1, 8); // TODO Magic numbers
-  TreeRectangulationZero rectangulation(tree_height);
+
+  const int tree_height = random.nextInt(1, 8); // TODO Magic number
+  TreeRectangulationZero rectangulation(rows, columns, tree_height);
 
   cv::Mat split_matrix = rectangulation.getSplitMatrix();
   return split_matrix;
@@ -207,8 +207,3 @@ std::ostream& operator<<(std::ostream& os, const TreeRectangulationZero& t)
   os << oss.str();
   return os;
 }
-  
-
-
-
-
