@@ -34,9 +34,13 @@ add_library(TreeRectangulation  ${CMAKE_CURRENT_SOURCE_DIR}/src/tree_rectangulat
 target_link_libraries(TreeRectangulation ${OpenCV_LIBS} Rectangulation RNG)
 set_property(TARGET TreeRectangulation PROPERTY CXX_STANDARD 11)
 
-add_library(TreeRectangulationZero  ${CMAKE_CURRENT_SOURCE_DIR}/src/tree_rectangulation_zero)
+add_library(TreeRectangulationZero ${CMAKE_CURRENT_SOURCE_DIR}/src/tree_rectangulation_zero)
 target_link_libraries(TreeRectangulationZero ${OpenCV_LIBS} Rectangulation RNG)
 set_property(TARGET TreeRectangulationZero PROPERTY CXX_STANDARD 11)
+
+add_library(GridRectangulation ${CMAKE_CURRENT_SOURCE_DIR}/src/grid_rectangulation)
+target_link_libraries(GridRectangulation ${OpenCV_LIBS} Rectangulation RNG)
+set_property(TARGET GridRectangulation PROPERTY CXX_STANDARD 11)
 
 add_library(Transformation  ${CMAKE_CURRENT_SOURCE_DIR}/src/transformation)
 
@@ -108,6 +112,10 @@ add_executable(TRZTest ${CMAKE_CURRENT_SOURCE_DIR}/src/trz_test)
 set_property(TARGET TRZTest PROPERTY CXX_STANDARD 11)
 set_property(TARGET TRZTest PROPERTY CXX_STANDARD_REQUIRED ON)
 
+add_executable(CLAHEExperiment ${CMAKE_CURRENT_SOURCE_DIR}/src/clahe_experiment)
+set_property(TARGET CLAHEExperiment PROPERTY CXX_STANDARD 11)
+set_property(TARGET CLAHEExperiment PROPERTY CXX_STANDARD_REQUIRED ON)
+
 target_link_libraries(Main
 				${OpenCV_LIBS}
 				${Boost_LIBRARIES}
@@ -167,5 +175,13 @@ target_link_libraries(TRZTest
 				CLAHETransformation
 				CircleInterpolation
 				ContrastImprovementRatio
+				ImageStreamer
+				)
+				
+target_link_libraries(CLAHEExperiment
+				${Boost_LIBRARIES}
+				${OpenCV_LIBS}				
+				GridRectangulation	
+				CLAHETransformation				
 				ImageStreamer
 				)
