@@ -9,7 +9,7 @@
 
 #include <dlib/optimization.h>
 
-std::pair<double, cv::Mat> optimize(const cv::Mat original_image){
+std::pair<double, cv::Mat> optimize(const cv::Mat original_image, double clip_limit=0.65){
   const long long seed = 2017;
   
   Random& random = Random::getInstance();
@@ -36,7 +36,6 @@ std::pair<double, cv::Mat> optimize(const cv::Mat original_image){
     //cv::waitKey(0);
     }*/
 
-  const double clip_limit = 0.65;
   const double radius = 4;
   CLAHETransformation transformation(original_image, r, clip_limit);
   CircleInterpolation interpolation(radius);

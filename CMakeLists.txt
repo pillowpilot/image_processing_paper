@@ -67,6 +67,10 @@ add_library(CircleInterpolation  ${CMAKE_CURRENT_SOURCE_DIR}/src/circle_interpol
 target_link_libraries(CircleInterpolation ${OpenCV_LIBS} InterpolationScheme Transformation)
 set_property(TARGET CircleInterpolation PROPERTY CXX_STANDARD 11)
 
+add_library(BilinearInterpolation  ${CMAKE_CURRENT_SOURCE_DIR}/src/bilinear_interpolation)
+target_link_libraries(BilinearInterpolation ${OpenCV_LIBS} InterpolationScheme Transformation)
+set_property(TARGET BilinearInterpolation PROPERTY CXX_STANDARD 11)
+
 add_library(Metric  ${CMAKE_CURRENT_SOURCE_DIR}/src/metric)
 target_link_libraries(Metric ${OpenCV_LIBS})
 
@@ -184,4 +188,6 @@ target_link_libraries(CLAHEExperiment
 				GridRectangulation	
 				CLAHETransformation				
 				ImageStreamer
+				BilinearInterpolation
+				AHETransformation
 				)
